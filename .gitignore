@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entorno virtual
+env/
+venv/
+ENV/
+.venv/
+
+# Archivos de base de datos
+db.sqlite3
+*.db
+*.sqlite3
+
+# Archivos de migraciones compilados
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*.py~
+*/migrations/*.log
+
+# Archivos de configuración local
+*.env
+.env
+*.local
+settings_local.py
+
+# Archivos de logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Archivos estáticos y de compilación
+/staticfiles/
+media/
+build/
+dist/
+node_modules/
