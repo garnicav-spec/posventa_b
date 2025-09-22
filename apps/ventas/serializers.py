@@ -10,47 +10,59 @@ class DetalleVentaSerializer(serializers.ModelSerializer):
         fields = ["id", "producto", "producto_nombre", "cantidad", "precio_unitario", "descuento", "subtotal"]
         
 class VentaSerializer(serializers.ModelSerializer):
-    detalles = DetalleVentaSerializer(many=True)  # 👈 se anidan detalles dentro de una venta
+    detalles = DetalleVentaSerializer(many=True)
 
     class Meta:
         model = Venta
         fields = "__all__"
 
     def create(self, validated_data):
-        detalles_data = validated_data.pop('detalles')  # extraemos los detalles
+        detalles_data = validated_data.pop('detalles')
+        
+        # CORRECCIÓN CRÍTICA: Asignar usuario automáticamente
+        validated_data['usuario'] = self.context['request'].user
+        
         venta = Venta.objects.create(**validated_data)
 
-        total = 0
+        total_bruto = 0
+        total_descuento = 0
+        
         for detalle in detalles_data:
             producto = detalle['producto']
             cantidad = detalle['cantidad']
-            subtotal = cantidad * detalle['precio_unitario']
+            precio_unitario = detalle['precio_unitario']
+            descuento = detalle.get('descuento', 0)
+            
 
-            # crear el detalle
             DetalleVenta.objects.create(
                 venta=venta,
-                **detalle,
-                sub_total=subtotal
+                producto=producto,
+                cantidad=cantidad,
+                precio_unitario=precio_unitario,
+                descuento=descuento
+                # subtotal se calcula automáticamente en el modelo
             )
 
-            # actualizar stock
+            # Actualizar stock
             try:
                 inventario = InventarioSucursal.objects.get(
                     sucursal=venta.sucursal,
                     producto=producto
                 )
                 if inventario.stock_actual < cantidad:
-                    raise serializers.ValidationError(f"No hay suficiente stock de {producto}.")
+                    raise serializers.ValidationError(f"No hay suficiente stock de {producto.nombre}.")
                 inventario.stock_actual -= cantidad
                 inventario.save()
             except InventarioSucursal.DoesNotExist:
-                raise serializers.ValidationError(f"El producto {producto} no tiene stock en esta sucursal.")
+                raise serializers.ValidationError(f"El producto {producto.nombre} no tiene stock en esta sucursal.")
 
-            total += subtotal
+            total_bruto += (cantidad * precio_unitario)
+            total_descuento += descuento
 
-        # actualizar totales de la venta
-        venta.total_venta = total
-        venta.total_neto = total - venta.total_descuento
+        # CORREGIR: usar los nombres correctos de campo del modelo
+        venta.total_bruto = total_bruto
+        venta.total_descuento = total_descuento
+        venta.total_neto = total_bruto - total_descuento
         venta.save()
 
         return venta

@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from .models import (
     Cliente, Sucursal, PuntoVenta
     , EstadoVenta, Ciudad
@@ -15,6 +16,8 @@ class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nit', 'nombre', 'razon_social']
     
 class SucursalViewSet(viewsets.ModelViewSet):
     queryset = Sucursal.objects.all()

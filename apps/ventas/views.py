@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from .models import Venta, DetalleVenta, MetodoPago, FacturaSimulada, VentaPago
-from .serializers import (VentaSerializer, DetalleVentaSerializer, 
+from .serializers import (VentaPagoSerializer, VentaSerializer, DetalleVentaSerializer, 
     MetodoPagoSerializer, FacturaSimuladaSerializer, 
     MetodoPagoSerializer
 )
@@ -12,6 +12,19 @@ class VentaViewSet(viewsets.ModelViewSet):
     queryset = Venta.objects.all()
     serializer_class = VentaSerializer
     permission_classes = [IsAuthenticated]
+    
+    # AGREGAR: Asegurar que el contexto se pasa al serializer
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+           'request': self.request,
+        })
+        return context
+
+    def perform_create(self, serializer):
+        # OPCIONAL: También puedes hacerlo aquí si prefieres
+        # serializer.save(usuario=self.request.user)
+        serializer.save()
 
     @action(detail=True, methods=['post'])
     def agregar_detalle(self, request, pk=None):
@@ -52,7 +65,7 @@ class DetalleVentaViewSet(viewsets.ModelViewSet):
 
 class VentaPagoViewSet(viewsets.ModelViewSet):
     queryset = VentaPago.objects.all()
-    serializer_class = MetodoPagoSerializer  # ⚠️ esto deberías cambiarlo
+    serializer_class = VentaPagoSerializer   # ⚠️ esto deberías cambiarlo
     permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=['post'])
