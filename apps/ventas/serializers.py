@@ -20,7 +20,8 @@ class VentaSerializer(serializers.ModelSerializer):
         detalles_data = validated_data.pop('detalles')
         
         # CORRECCIÓN CRÍTICA: Asignar usuario automáticamente
-        validated_data['usuario'] = self.context['request'].user
+        if 'usuario' not in validated_data:
+            validated_data['usuario'] = self.context['request'].user
         
         venta = Venta.objects.create(**validated_data)
 

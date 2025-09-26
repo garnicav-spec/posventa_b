@@ -24,7 +24,7 @@ class VentaViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # OPCIONAL: También puedes hacerlo aquí si prefieres
         # serializer.save(usuario=self.request.user)
-        serializer.save()
+        serializer.save(usuario=self.request.user)
 
     @action(detail=True, methods=['post'])
     def agregar_detalle(self, request, pk=None):
