@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, filters
+from rest_framework.exceptions import APIException
+from django.db import IntegrityError
 
 from .models import (
     Producto, InventarioSucursal,
@@ -41,6 +43,22 @@ class InventarioSucursalViewSet(viewsets.ModelViewSet):
         qs = InventarioSucursal.objects.filter(stock_actual__lt=F('stock_minimo'))
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            raise APIException(f"Error de integridad en la base de datos: {str(e)}")
+        except ValidationError as e:
+            raise APIException(f"Error de validación: {str(e)}")
+
+    def perform_update(self, serializer):
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            raise APIException(f"Error de integridad en la base de datos: {str(e)}")
+        except ValidationError as e:
+            raise APIException(f"Error de validación: {str(e)}")
 
 class ImagenProductoViewSet(viewsets.ModelViewSet):
     queryset = ImagenProducto.objects.all()

@@ -89,9 +89,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'posventa',       # Nombre de la DB
+        'NAME': 'todo-3',       # Nombre de la DB
         'USER': 'postgres',        # Usuario PostgreSQL
-        'PASSWORD': '1107', # Contraseña PostgreSQL
+        'PASSWORD': '7364', # Contraseña PostgreSQL
         'HOST': 'localhost',         # Si PostgreSQL está instalado localmente
         'PORT': '5432',
     }

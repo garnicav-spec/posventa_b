@@ -28,7 +28,7 @@ class ProductoSerializer(serializers.ModelSerializer):
         ]
 
 class InventarioSucursalSerializer(serializers.ModelSerializer):
-    producto = ProductoSerializer(read_only=True)
+    producto = serializers.PrimaryKeyRelatedField(queryset=Producto.objects.all())  # Asegúrate de usar solo el id
 
     class Meta:
         model = InventarioSucursal

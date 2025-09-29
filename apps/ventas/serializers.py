@@ -15,25 +15,24 @@ class VentaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venta
         fields = "__all__"
+        read_only_fields = ("usuario", "total_bruto", "total_descuento", "total_neto")
 
     def create(self, validated_data):
-        detalles_data = validated_data.pop('detalles')
-        
-        # CORRECCIÓN CRÍTICA: Asignar usuario automáticamente
-        if 'usuario' not in validated_data:
-            validated_data['usuario'] = self.context['request'].user
-        
+        detalles_data = validated_data.pop("detalles")
+
+        # ✅ asignar usuario automáticamente desde el request
+        validated_data["usuario"] = self.context["request"].user  
+
         venta = Venta.objects.create(**validated_data)
 
         total_bruto = 0
         total_descuento = 0
-        
+
         for detalle in detalles_data:
-            producto = detalle['producto']
-            cantidad = detalle['cantidad']
-            precio_unitario = detalle['precio_unitario']
-            descuento = detalle.get('descuento', 0)
-            
+            producto = detalle["producto"]
+            cantidad = detalle["cantidad"]
+            precio_unitario = detalle["precio_unitario"]
+            descuento = detalle.get("descuento", 0)
 
             DetalleVenta.objects.create(
                 venta=venta,
@@ -41,10 +40,9 @@ class VentaSerializer(serializers.ModelSerializer):
                 cantidad=cantidad,
                 precio_unitario=precio_unitario,
                 descuento=descuento
-                # subtotal se calcula automáticamente en el modelo
             )
 
-            # Actualizar stock
+            # actualizar stock (como ya tienes)
             try:
                 inventario = InventarioSucursal.objects.get(
                     sucursal=venta.sucursal,
@@ -57,10 +55,9 @@ class VentaSerializer(serializers.ModelSerializer):
             except InventarioSucursal.DoesNotExist:
                 raise serializers.ValidationError(f"El producto {producto.nombre} no tiene stock en esta sucursal.")
 
-            total_bruto += (cantidad * precio_unitario)
+            total_bruto += cantidad * precio_unitario
             total_descuento += descuento
 
-        # CORREGIR: usar los nombres correctos de campo del modelo
         venta.total_bruto = total_bruto
         venta.total_descuento = total_descuento
         venta.total_neto = total_bruto - total_descuento
@@ -83,9 +80,12 @@ class VentaPagoSerializer(serializers.ModelSerializer):
     metodo_pago_id = serializers.PrimaryKeyRelatedField(
         queryset=MetodoPago.objects.all(), source="metodo_pago", write_only=True
     )
+    venta_id = serializers.PrimaryKeyRelatedField(
+        queryset=Venta.objects.all(), source="venta", write_only=True
+    )
 
     class Meta:
         model = VentaPago
-        fields = ["id", "metodo_pago", "metodo_pago_id", "monto", "referencia"]
+        fields = ["id", "venta_id", "metodo_pago", "metodo_pago_id", "monto", "referencia"]
 
     
