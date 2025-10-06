@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Venta, DetalleVenta, MetodoPago, FacturaSimulada, VentaPago
 from apps.inventario.models import InventarioSucursal
 
@@ -65,11 +66,41 @@ class VentaSerializer(serializers.ModelSerializer):
 
         return venta
 
+
 class FacturaSimuladaSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacturaSimulada
-        fields = ["id", "nit_ci", "razon_social", "numero_factura", "fecha_emision"]
+        fields = ['numero_factura', 'fecha_emision', 'nit_ci', 'razon_social', 'nombre_cliente', 'detalles_venta']
+        read_only_fields = ['numero_factura', 'fecha_emision']
 
+    def create(self, validated_data):
+        venta = validated_data['venta']
+        
+        # Obtener detalles de la venta
+        detalles_venta = [
+            {
+                'producto': detalle.producto.nombre,
+                'cantidad': detalle.cantidad,
+                'precio_unitario': detalle.precio_unitario,
+                'descuento': detalle.descuento,
+                'subtotal': detalle.subtotal
+            }
+            for detalle in venta.detalles.all()
+        ]
+        
+        # Crear factura simulada
+        factura = FacturaSimulada.objects.create(
+            venta=venta,
+            numero_factura=FacturaSimulada.generar_numero_factura(),
+            fecha_emision=timezone.now(),
+            nit_ci=validated_data.get('nit_ci', ''),
+            razon_social=validated_data.get('razon_social', ''),
+            nombre_cliente=validated_data.get('nombre_cliente', ''),
+            detalles_venta=detalles_venta
+        )
+        
+        return factura
+    
 class MetodoPagoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetodoPago

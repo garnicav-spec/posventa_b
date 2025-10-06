@@ -3,6 +3,8 @@ from rest_framework import status, viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.utils import timezone
+from django.db.models import Max
 
 from .models import Venta, DetalleVenta, MetodoPago, FacturaSimulada, VentaPago
 from .serializers import (
@@ -124,22 +126,110 @@ class VentaViewSet(viewsets.ModelViewSet):
                                 costo_unitario=det.precio_unitario,
                             )
 
+            # Después de procesar la venta, generamos automáticamente la factura
+            self.generar_factura(venta)
+
+    def generar_factura(self, venta):
+        """Genera la factura automáticamente cuando la venta se procesa"""
+        try:
+            # Generar los datos de la factura
+            numero_factura = FacturaSimulada.generar_numero_factura()
+
+            # Recoger los detalles de la venta
+            detalles_venta = [
+                {
+                    'producto': detalle.producto.nombre,
+                    'cantidad': detalle.cantidad,
+                    'precio_unitario': detalle.precio_unitario,
+                    'descuento': detalle.descuento,
+                    'subtotal': detalle.subtotal
+                }
+                for detalle in venta.detalles.all()
+            ]
+            
+            # Crear la factura simulada
+            factura_data = {
+                'venta': venta,
+                'numero_factura': numero_factura,
+                'fecha_emision': timezone.now(),
+                'nit_ci': venta.cliente.nit if venta.cliente else '',
+                'razon_social': venta.cliente.razon_social if venta.cliente else '',
+                'nombre_cliente': venta.cliente.nombre if venta.cliente else '',
+                'detalles_venta': detalles_venta
+            }
+
+            # Usamos el serializador para crear la factura
+            factura_serializer = FacturaSimuladaSerializer(data=factura_data)
+            factura_serializer.is_valid(raise_exception=True)
+            factura_serializer.save()
+
+            return Response({
+                "mensaje": "Factura generada exitosamente",
+                "factura": factura_serializer.data
+            })
+
+        except Exception as e:
+            return Response({"mensaje": f"Error generando factura: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)                            
 
 class FacturaSimuladaViewSet(viewsets.ModelViewSet):
     queryset = FacturaSimulada.objects.all()
     serializer_class = FacturaSimuladaSerializer
-    permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['post'])
-    def generar(self, request):
-        """Generar factura simulada"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        factura = serializer.save()
-        return Response({
-            "mensaje": "Factura simulada generada con éxito",
-            "factura": serializer.data
-        })
+    @action(detail=True, methods=["post"])
+    def generar(self, request, pk=None):
+        print("Solicitud de generar factura recibida")
+        try:
+            venta = Venta.objects.get(pk=pk)
+            print("Venta encontrada:", venta)
+
+            # Obtener datos del cliente y detalles de la venta
+            cliente = venta.cliente
+            nit_ci = cliente.nit if cliente else ""
+            razon_social = cliente.razon_social if cliente else ""
+            nombre_cliente = cliente.nombre if cliente else "Cliente General"
+
+            detalles_venta = [
+                {
+                    'producto': detalle.producto.nombre,
+                    'cantidad': detalle.cantidad,
+                    'precio_unitario': detalle.precio_unitario,
+                    'descuento': detalle.descuento,
+                    'subtotal': detalle.subtotal
+                }
+                for detalle in venta.detalles.all()
+            ]
+
+            # Crear factura simulada
+            factura = FacturaSimulada.objects.create(
+                venta=venta,
+                numero_factura=FacturaSimulada.generar_numero_factura(),
+                fecha_emision=timezone.now(),
+                nit_ci=nit_ci,
+                razon_social=razon_social,
+                nombre_cliente=nombre_cliente,
+                detalles_venta=detalles_venta
+            )
+
+            serializer = FacturaSimuladaSerializer(factura)
+            print("Factura generada:", serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Venta.DoesNotExist:
+            return Response({"error": "Venta no encontrada."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def generar_numero_factura(self):
+        """Generar el número de factura incrementando con cada venta."""
+        ultimo_factura = FacturaSimulada.objects.aggregate(Max('numero_factura'))
+        ultimo_numero = ultimo_factura['numero_factura__max']
+        
+        if ultimo_numero:
+            nuevo_numero = int(ultimo_numero.split('-')[1]) + 1
+        else:
+            nuevo_numero = 1
+
+        return f"FAC-{nuevo_numero:05d}"  # Formato de factura FAC-00001
 
 class MetodoPagoViewSet(viewsets.ModelViewSet):
     queryset = MetodoPago.objects.all()

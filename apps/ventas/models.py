@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.db.models import Max
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from apps.negocio.models import Sucursal, Cliente, EstadoVenta
 from apps.usuarios.models import Usuario
@@ -45,13 +47,16 @@ class DetalleVenta(models.Model):
     def __str__(self):
         return f"{self.producto.nombre} x {self.cantidad}"
 
-class FacturaSimulada(models.Model):
-    venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
-    nit_ci = models.CharField(max_length=30)
-    razon_social = models.CharField(max_length=255)
-    numero_factura = models.CharField(max_length=100)
-    fecha_emision = models.DateTimeField(auto_now_add=True)
 
+class FacturaSimulada(models.Model):
+    venta = models.ForeignKey('ventas.Venta', on_delete=models.CASCADE)
+    numero_factura = models.CharField(max_length=100, unique=True)
+    fecha_emision = models.DateTimeField(default=timezone.now)
+    nit_ci = models.CharField(max_length=30, blank=True, null=True)
+    razon_social = models.CharField(max_length=255, blank=True, null=True)
+    nombre_cliente = models.CharField(max_length=255, blank=True, null=True)
+    detalles_venta = models.JSONField()  # Para almacenar los detalles de la venta en formato JSON
+    
     class Meta:
         app_label = 'ventas'
         verbose_name = 'Factura Simulada'
@@ -60,6 +65,40 @@ class FacturaSimulada(models.Model):
 
     def __str__(self):
         return f"Factura {self.numero_factura} - Venta {self.venta.id}"
+
+    @staticmethod
+    def generar_numero_factura():
+        """Generar el número de factura incrementando con cada venta."""
+        ultimo_factura = FacturaSimulada.objects.aggregate(Max('numero_factura'))
+        ultimo_numero = ultimo_factura['numero_factura__max']
+        
+        if ultimo_numero:
+            nuevo_numero = int(ultimo_numero.split('-')[1]) + 1
+        else:
+            nuevo_numero = 1
+
+        return f"FAC-{nuevo_numero:05d}"
+
+    def save(self, *args, **kwargs):
+        if not self.numero_factura:
+            self.numero_factura = FacturaSimulada.generar_numero_factura()
+        
+        if self.venta:
+            self.nit_ci = self.venta.cliente.nit if self.venta.cliente else ""
+            self.razon_social = self.venta.cliente.razon_social if self.venta.cliente else ""
+            self.nombre_cliente = self.venta.cliente.nombre if self.venta.cliente else ""
+            self.detalles_venta = [
+                {
+                    'producto': detalle.producto.nombre,
+                    'cantidad': detalle.cantidad,
+                    'precio_unitario': detalle.precio_unitario,
+                    'descuento': detalle.descuento,
+                    'subtotal': detalle.subtotal
+                }
+                for detalle in self.venta.detalles.all()
+            ]
+        
+        super().save(*args, **kwargs)
 
 class MetodoPago(models.Model):
     nombre = models.CharField(max_length=50)
@@ -87,3 +126,4 @@ class VentaPago(models.Model):
 
     def __str__(self):
         return f"Pago de {self.monto} - {self.metodo_pago.nombre}"
+
