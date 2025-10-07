@@ -16,8 +16,10 @@ SECRET_KEY = 'django-insecure-pwp(p%#bo$f8cjrz%tr(lpi=jod@y&vk06spo-grsbu2tclg^&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 # Application definition
 
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Añadir esta línea
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -50,18 +53,32 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-]
-
-"""CORS_ALLOW_ALL_ORIGINS = True"""
-
-# CORS (si lo usas)
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Tu frontend Vite
     "http://127.0.0.1:5173",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# CORS (si lo usas)
+"""CORS_ALLOW_ALL_ORIGINS = True"""  # Solo para desarrollo
+
 
 ROOT_URLCONF = 'core.urls'
 
@@ -82,9 +99,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
+STATIC_ROOT = BASE_DIR/'staticfiles'
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+AUTH_USER_MODEL = 'usuarios.Usuario'
 
 DATABASES = {
     'default': {
@@ -96,7 +115,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -115,18 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-}
 
 from datetime import timedelta
 
@@ -148,17 +154,16 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
+MEDIA_URL = '/productos/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'productos')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'es-es'
+TIME_ZONE = 'America/La_Paz'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -166,7 +171,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATICFILES_DIRS = [BASE_DIR / "static"]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
