@@ -4,21 +4,23 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_URL = "http://localhost:5173"
+#FRONTEND_URL = "http://localhost:5173"
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pwp(p%#bo$f8cjrz%tr(lpi=jod@y&vk06spo-grsbu2tclg^&'
+SECRET_KEY = 'jvhbs4o_^*mk(f(a4j*0^2vuhkoc=e1ycup49b=tm*3mnr8po1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
+    #'localhost',
+    #'127.0.0.1',
+    #'systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net',
+    '*',
 ]
 
 # Application definition
@@ -39,12 +41,12 @@ INSTALLED_APPS = [
     "corsheaders",
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Añadir esta línea
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,6 +54,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+ROOT_URLCONF = 'core.urls'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -65,22 +69,19 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
+#AUTHENTICATION_BACKENDS = [
+#    'django.contrib.auth.backends.ModelBackend',
+#]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:5173",
+#    "http://127.0.0.1:5173",
+#]
 
-CORS_ALLOW_CREDENTIALS = True
+#CORS_ALLOW_CREDENTIALS = True
 
 # CORS (si lo usas)
-"""CORS_ALLOW_ALL_ORIGINS = True"""  # Solo para desarrollo
-
-
-ROOT_URLCONF = 'core.urls'
+#CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
 
 TEMPLATES = [
     {
@@ -89,6 +90,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -99,22 +101,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-STATIC_ROOT = BASE_DIR/'staticfiles'
+#STATIC_ROOT = BASE_DIR/'staticfiles'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+#TO-DO update db to use the postgresql / Azure and ElephantDb
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'todo-3',       # Nombre de la DB
-        'USER': 'postgres',        # Usuario PostgreSQL
-        'PASSWORD': '7364', # Contraseña PostgreSQL
-        'HOST': 'localhost',         # Si PostgreSQL está instalado localmente
+        'NAME': 'djangodbpos',
+        'HOST': 'djangowebdbpostgres.postgres.database.azure.com',
+        'USER': 'AdminReal',
+        'PASSWORD': 'Adr-09102025',
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
+
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -154,8 +167,8 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-MEDIA_URL = '/productos/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'productos')
+#MEDIA_URL = '/productos/'
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'productos')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -171,7 +184,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+#STATICFILES_DIRS = [BASE_DIR / "static"]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
