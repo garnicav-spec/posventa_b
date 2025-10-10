@@ -50,16 +50,15 @@ STORAGES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'djangodbpos',
-        'HOST': 'djangowebdbpostgres.postgres.database.azure.com',
-        'USER': 'AdminReal',
-        'PASSWORD': 'Adr-09102025',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
         'OPTIONS': {
-            'sslmode': 'require',
+            'sslmode': 'require',  # Asegura que la conexión sea segura (SSL)
         },
     }
 }
-
 # Static files settings (Para producción, usar WhiteNoise para servir archivos estáticos)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
