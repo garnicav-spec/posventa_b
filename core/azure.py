@@ -2,8 +2,8 @@ import os
 import sys
 from pathlib import Path
 from .settings import *  # hereda configuración base
+from .settings import BASE_DIR
 
-WIBBLE2 = 'Wibble2'
 
 # 1. Añadir carpeta de aplicaciones al PYTHONPATH
 #BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,13 +25,18 @@ WIBBLE2 = 'Wibble2'
 
 #STATIC_ROOT = BASE_DIR / 'staticfiles'  # Carpeta donde se almacenarán los archivos estáticos procesados
 
-CORS_ALLOWED_ORIGINS = ['https://systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net']  # Asegúrate de configurar esta variable en Azure,
-
+#CORS_ALLOWED_ORIGINS = ['https://systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net']  # Asegúrate de configurar esta variable en Azure,
+ALLOWED_HOSTS = ['djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net']
 #CSRF_TRUSTED_ORIGINS = ['https://*']
-CSRF_TRUSTED_ORIGINS = ['https://systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net']
+CSRF_TRUSTED_ORIGINS = ['https://djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net']
+
+DEBUG = False
+
+SECRET_KEY = os.environ['MY_SECRET_KEY']
 
 #add the next middleware for whitenoise
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # Enables whitenoise for serving static files
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -43,4 +48,31 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+CORS_ALLOWED_ORIGINS = [
+    'https://' 
+]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'djangodbpos',
+        'HOST': 'djangowebdbpostgres.postgres.database.azure.com',
+        'USER': 'AdminReal',
+        'PASSWORD': 'Adr-09102025',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
+
+STATIC_ROOT = BASE_DIR, 'staticfiles'

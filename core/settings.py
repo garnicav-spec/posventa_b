@@ -14,13 +14,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'jvhbs4o_^*mk(f(a4j*0^2vuhkoc=e1ycup49b=tm*3mnr8po1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     #'localhost',
     #'127.0.0.1',
-    #'systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net',
-    '*',
 ]
 
 # Application definition
@@ -55,7 +53,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'core.urls'
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -73,15 +74,11 @@ REST_FRAMEWORK = {
 #    'django.contrib.auth.backends.ModelBackend',
 #]
 
-#CORS_ALLOWED_ORIGINS = [
-#    "http://localhost:5173",
-#    "http://127.0.0.1:5173",
-#]
-
 #CORS_ALLOW_CREDENTIALS = True
 
 # CORS (si lo usas)
 #CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
@@ -98,6 +95,8 @@ TEMPLATES = [
         },
     },
 ]
+
+STATIC_ROOT = BASE_DIR/'staticfiles'
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
