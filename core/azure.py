@@ -62,5 +62,4 @@ DATABASES = {
 }
 
 # Static files settings (Para producción, usar WhiteNoise para servir archivos estáticos)
-STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
