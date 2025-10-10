@@ -17,8 +17,8 @@ SECRET_KEY = 'jvhbs4o_^*mk(f(a4j*0^2vuhkoc=e1ycup49b=tm*3mnr8po1'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    #'localhost',
-    #'127.0.0.1',
+    'localhost',
+    '127.0.0.1',
 ]
 
 # Application definition
@@ -54,8 +54,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "https://localhost:5173",  # Desarrollo local
+    'http://127.0.0.1:5173',
 ]
 
 REST_FRAMEWORK = {
@@ -70,14 +70,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-#AUTHENTICATION_BACKENDS = [
-#    'django.contrib.auth.backends.ModelBackend',
-#]
-
-#CORS_ALLOW_CREDENTIALS = True
-
-# CORS (si lo usas)
-#CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
@@ -96,11 +88,7 @@ TEMPLATES = [
     },
 ]
 
-STATIC_ROOT = BASE_DIR/'staticfiles'
-
 WSGI_APPLICATION = 'core.wsgi.application'
-
-#STATIC_ROOT = BASE_DIR/'staticfiles'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -109,24 +97,12 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 #TO-DO update db to use the postgresql / Azure and ElephantDb
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'djangodbpos',
-        'HOST': 'djangowebdbpostgres.postgres.database.azure.com',
-        'USER': 'AdminReal',
-        'PASSWORD': 'Adr-09102025',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -182,8 +158,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-#STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

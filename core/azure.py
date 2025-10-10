@@ -1,38 +1,28 @@
 import os
-import sys
 from pathlib import Path
-from .settings import *  # hereda configuración base
-from .settings import BASE_DIR
 
+# Base directory
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 1. Añadir carpeta de aplicaciones al PYTHONPATH
-#BASE_DIR = Path(__file__).resolve().parent.parent
-
-# 2. Configuración de entorno
-#SECRET_KEY = os.environ['SECRET_KEY']
-#DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-#ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net').split(',')
-
-#import dj_database_url
-# Cargar la URL de la base de datos desde las variables de entorno
-#DATABASES = {
-#    'default': dj_database_url.config(
-#        default=os.environ.get('DATABASE_URL'),  # Se obtiene desde la variable de entorno
-#        conn_max_age=600,
-#        ssl_require=True  # Requiere SSL en Azure
-#    )
-#}
-
-#STATIC_ROOT = BASE_DIR / 'staticfiles'  # Carpeta donde se almacenarán los archivos estáticos procesados
-
-#CORS_ALLOWED_ORIGINS = ['https://systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net']  # Asegúrate de configurar esta variable en Azure,
-ALLOWED_HOSTS = ['djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net']
-#CSRF_TRUSTED_ORIGINS = ['https://*']
-CSRF_TRUSTED_ORIGINS = ['https://djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net']
+# Secret Key (en producción, siempre debe estar en variables de entorno)
+SECRET_KEY = os.environ['MY_SECRET_KEY']
 
 DEBUG = False
 
-SECRET_KEY = os.environ['MY_SECRET_KEY']
+#CORS_ALLOWED_ORIGINS = ['https://systema-pos-b-dhgsetd9dcfxadew.chilecentral-01.azurewebsites.net']  # Asegúrate de configurar esta variable en Azure,
+ALLOWED_HOSTS = [
+    'djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net',
+    'www.djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'https://', 
+]
+
+#aqui tambien va frontend
+CSRF_TRUSTED_ORIGINS = [
+    'https://djangowebappbckxz-bmd0g0eqdpbgg9a5.chilecentral-01.azurewebsites.net',
+]
 
 #add the next middleware for whitenoise
 MIDDLEWARE = [
@@ -46,10 +36,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'https://djangowebappbckxz-bmd0g0eqdpbgg9a5.scm.chilecentral-01.azurewebsites.net', 
 ]
 
 STORAGES = {
@@ -75,4 +61,6 @@ DATABASES = {
     }
 }
 
-STATIC_ROOT = BASE_DIR, 'staticfiles'
+# Static files settings (Para producción, usar WhiteNoise para servir archivos estáticos)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
