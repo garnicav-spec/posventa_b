@@ -49,7 +49,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://' 
+    'https://djangowebappbckxz-bmd0g0eqdpbgg9a5.scm.chilecentral-01.azurewebsites.net', 
 ]
 
 STORAGES = {
